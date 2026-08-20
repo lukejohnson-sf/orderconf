@@ -1,0 +1,203 @@
+import { useEffect, useState } from "react";
+import { motion } from "motion/react";
+
+/**
+ * A branded envelope in the package: the flap lifts open, the notecard
+ * slides out, then a cursive line writes itself on, followed by the order no.
+ *
+ * Stages:
+ *  idle     – sealed envelope
+ *  opening  – top flap unfolds up and back
+ *  rising   – the notecard slides up out of the envelope
+ *  writing  – cursive "Your order is confirmed" draws left to right
+ *  number   – "order #1234" fades in beneath
+ *  gone     – settled; onArrived fires
+ */
+export default function NotecardScene({ onArrived, standalone = false }) {
+  const [stage, setStage] = useState("idle");
+
+  useEffect(() => {
+    const timers = [];
+    timers.push(setTimeout(() => setStage("opening"), 600));
+    timers.push(setTimeout(() => setStage("rising"), 1650));
+    timers.push(setTimeout(() => setStage("writing"), 2650));
+    timers.push(setTimeout(() => setStage("number"), 4350));
+    timers.push(setTimeout(() => setStage("gone"), 5050));
+    return () => timers.forEach(clearTimeout);
+  }, []);
+
+  useEffect(() => {
+    if (stage === "gone") onArrived?.();
+  }, [stage, onArrived]);
+
+  const flapOpen = stage !== "idle";
+  const cardOut = ["rising", "writing", "number", "gone"].includes(stage);
+  const writeOn = ["writing", "number", "gone"].includes(stage);
+  const numberOn = ["number", "gone"].includes(stage);
+
+  return (
+    <div
+      className={
+        "relative flex w-full items-center justify-center bg-gradient-to-b from-white to-neutral-100 " +
+        (standalone
+          ? "min-h-[80vh] py-40"
+          : "aspect-[23/12] overflow-hidden")
+      }
+    >
+      <div
+        className="relative"
+        style={{
+          perspective: 1600,
+          width: standalone ? "min(46%, 340px)" : "min(58%, 300px)",
+          aspectRatio: "1 / 0.9",
+        }}
+      >
+        {/* ground shadow */}
+        <motion.div
+          className="absolute inset-x-6 bottom-0 h-4 rounded-[50%] bg-neutral-900/15 blur-md"
+          animate={{ scaleX: cardOut ? 1.06 : 1, opacity: cardOut ? 0.9 : 0.7 }}
+          transition={{ duration: 0.6 }}
+        />
+
+        {/* ===== envelope interior (the shaded inside, revealed once open) =====
+            Body occupies the lower 58%. Flaps meet at the center point C. */}
+        <div
+          className="absolute left-0 right-0 z-[10] rounded-[6px] bg-gradient-to-b from-neutral-200 to-neutral-100 ring-1 ring-neutral-200 shadow-[inset_0_22px_26px_-16px_rgba(0,0,0,0.28)]"
+          style={{ top: "42%", bottom: 0 }}
+        />
+
+        {/* ===== the notecard (slides up out of the envelope) ===== */}
+        <motion.div
+          className="absolute left-1/2 z-[15] flex flex-col items-center justify-center rounded-[3px] bg-white ring-1 ring-neutral-200"
+          style={{
+            width: "82%",
+            height: "60%",
+            top: "44%",
+            x: "-50%",
+            transformOrigin: "center bottom",
+            containerType: "inline-size",
+          }}
+          initial={false}
+          animate={{
+            y: cardOut ? "-74%" : "0%",
+            opacity: cardOut ? 1 : 0,
+            boxShadow: cardOut
+              ? "0 24px 40px -18px rgba(0,0,0,0.35)"
+              : "0 2px 6px -4px rgba(0,0,0,0.2)",
+          }}
+          transition={{
+            y: { duration: 0.9, ease: [0.22, 1, 0.36, 1] },
+            opacity: { duration: 0.25 },
+          }}
+        >
+          <img
+            src="/baggallini-logo.png"
+            alt="baggallini"
+            className="mb-5 h-3.5 w-auto opacity-90"
+          />
+
+          {/* cursive line drawn left to right */}
+          <motion.p
+            className="px-4 py-1 text-center text-neutral-900"
+            style={{
+              fontFamily: '"Great Vibes", cursive',
+              fontSize: "clamp(20px, 13cqw, 40px)",
+              lineHeight: 1.5,
+            }}
+            initial={{ clipPath: "inset(0 100% 0 0)" }}
+            animate={{ clipPath: writeOn ? "inset(0 0% 0 0)" : "inset(0 100% 0 0)" }}
+            transition={{ duration: 1.7, ease: [0.42, 0, 0.4, 1] }}
+          >
+            Your order is confirmed
+          </motion.p>
+
+          {/* order number beneath */}
+          <motion.p
+            className="mt-4 text-[11px] font-medium uppercase tracking-[0.3em] text-neutral-500"
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: numberOn ? 1 : 0, y: numberOn ? 0 : 6 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+          >
+            order #1234
+          </motion.p>
+        </motion.div>
+
+        {/* ===== front pocket: left + right + bottom flaps meeting at center C ===== */}
+        <div className="absolute left-0 right-0 z-20" style={{ top: "42%", bottom: 0 }}>
+          {/* left flap */}
+          <div
+            className="absolute inset-0 bg-white"
+            style={{ clipPath: "polygon(0 0, 0 100%, 50% 40%)" }}
+          />
+          {/* right flap (a touch darker for form) */}
+          <div
+            className="absolute inset-0 bg-neutral-50"
+            style={{ clipPath: "polygon(100% 0, 100% 100%, 50% 40%)" }}
+          />
+          {/* bottom flap, front-most so the card tucks behind it */}
+          <div
+            className="absolute inset-0 rounded-b-[6px] bg-gradient-to-t from-neutral-100 to-white shadow-[0_-1px_2px_rgba(0,0,0,0.06)]"
+            style={{ clipPath: "polygon(0 100%, 100% 100%, 50% 40%)" }}
+          />
+          {/* seam shadows along the flap edges */}
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{
+              clipPath: "polygon(50% 40%, 51% 41%, 100% 100%, 99% 100%)",
+              background: "rgba(0,0,0,0.10)",
+            }}
+          />
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{
+              clipPath: "polygon(50% 40%, 49% 41%, 0 100%, 1% 100%)",
+              background: "rgba(0,0,0,0.06)",
+            }}
+          />
+        </div>
+
+        {/* ===== top flap: hinged at the fold line — folds down (closed) → up (open) =====
+            open  = rotateX(0)   → triangle pointing UP (matches a real open envelope)
+            closed = rotateX(180) → folded down over the front */}
+        <motion.div
+          className="absolute left-0 top-0"
+          style={{
+            width: "100%",
+            height: "42%",
+            transformOrigin: "50% 100%",
+            transformStyle: "preserve-3d",
+            zIndex: flapOpen ? 11 : 40,
+          }}
+          initial={false}
+          animate={{ rotateX: flapOpen ? 0 : 180 }}
+          transition={{ duration: 0.9, ease: [0.34, 1.12, 0.5, 1] }}
+        >
+          {/* underside of the flap (seen when open, points up) */}
+          <div
+            className="absolute inset-0 bg-gradient-to-t from-neutral-200 to-neutral-100"
+            style={{ clipPath: "polygon(50% 0, 100% 100%, 0 100%)", backfaceVisibility: "hidden" }}
+          />
+          {/* soft shadow the standing flap casts near the fold */}
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{
+              clipPath: "polygon(0 100%, 100% 100%, 50% 62%)",
+              background:
+                "linear-gradient(to top, rgba(0,0,0,0.14), rgba(0,0,0,0))",
+              backfaceVisibility: "hidden",
+            }}
+          />
+          {/* outer face of the flap (white, seen while closed) */}
+          <div
+            className="absolute inset-0 rounded-t-[6px] bg-gradient-to-b from-white to-neutral-100 ring-1 ring-neutral-200"
+            style={{
+              clipPath: "polygon(50% 0, 100% 100%, 0 100%)",
+              transform: "rotateX(180deg)",
+              backfaceVisibility: "hidden",
+            }}
+          />
+        </motion.div>
+      </div>
+    </div>
+  );
+}
