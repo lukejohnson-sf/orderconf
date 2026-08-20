@@ -60,26 +60,25 @@ export default function NotecardScene({ onArrived, standalone = false }) {
         />
 
         {/* ===== envelope interior (the shaded inside, revealed once open) =====
-            Body occupies the lower 58%. Flaps meet at the center point C. */}
+            Full body behind everything; the open top-triangle shows this. */}
         <div
-          className="absolute left-0 right-0 z-[10] rounded-[6px] bg-gradient-to-b from-neutral-200 to-neutral-100 ring-1 ring-neutral-200 shadow-[inset_0_22px_26px_-16px_rgba(0,0,0,0.28)]"
-          style={{ top: "42%", bottom: 0 }}
+          className="absolute inset-0 z-[10] rounded-[8px] bg-gradient-to-b from-neutral-200/80 via-neutral-100 to-white ring-1 ring-neutral-200 shadow-[inset_0_26px_30px_-18px_rgba(0,0,0,0.30)]"
         />
 
         {/* ===== the notecard (slides up out of the envelope) ===== */}
         <motion.div
           className="absolute left-1/2 z-[15] flex flex-col items-center justify-center rounded-[3px] bg-white ring-1 ring-neutral-200"
           style={{
-            width: "82%",
-            height: "60%",
-            top: "44%",
+            width: "78%",
+            height: "64%",
+            top: "34%",
             x: "-50%",
             transformOrigin: "center bottom",
             containerType: "inline-size",
           }}
           initial={false}
           animate={{
-            y: cardOut ? "-74%" : "0%",
+            y: cardOut ? "-92%" : "10%",
             opacity: cardOut ? 1 : 0,
             boxShadow: cardOut
               ? "0 24px 40px -18px rgba(0,0,0,0.35)"
@@ -122,78 +121,72 @@ export default function NotecardScene({ onArrived, standalone = false }) {
           </motion.p>
         </motion.div>
 
-        {/* ===== front pocket: left + right + bottom flaps meeting at center C ===== */}
-        <div className="absolute left-0 right-0 z-20" style={{ top: "42%", bottom: 0 }}>
+        {/* ===== front pocket: left + right + bottom flaps meeting at center C =====
+            Covers the whole front EXCEPT the top-center triangle (apex down at C),
+            which is where the top flap seats when closed / the interior shows when open. */}
+        <div className="absolute inset-0 z-20">
           {/* left flap */}
           <div
-            className="absolute inset-0 bg-white"
-            style={{ clipPath: "polygon(0 0, 0 100%, 50% 40%)" }}
+            className="absolute inset-0 bg-gradient-to-r from-neutral-100 to-white"
+            style={{ clipPath: "polygon(0 0, 0 100%, 50% 58%)" }}
           />
           {/* right flap (a touch darker for form) */}
           <div
-            className="absolute inset-0 bg-neutral-50"
-            style={{ clipPath: "polygon(100% 0, 100% 100%, 50% 40%)" }}
+            className="absolute inset-0 bg-gradient-to-l from-neutral-200/70 to-white"
+            style={{ clipPath: "polygon(100% 0, 100% 100%, 50% 58%)" }}
           />
           {/* bottom flap, front-most so the card tucks behind it */}
           <div
-            className="absolute inset-0 rounded-b-[6px] bg-gradient-to-t from-neutral-100 to-white shadow-[0_-1px_2px_rgba(0,0,0,0.06)]"
-            style={{ clipPath: "polygon(0 100%, 100% 100%, 50% 40%)" }}
+            className="absolute inset-0 rounded-b-[8px] bg-gradient-to-t from-neutral-100 to-white"
+            style={{ clipPath: "polygon(0 100%, 100% 100%, 50% 58%)" }}
           />
-          {/* seam shadows along the flap edges */}
+          {/* seam shadows radiating from the center point C */}
           <div
             className="pointer-events-none absolute inset-0"
-            style={{
-              clipPath: "polygon(50% 40%, 51% 41%, 100% 100%, 99% 100%)",
-              background: "rgba(0,0,0,0.10)",
-            }}
+            style={{ clipPath: "polygon(50% 58%, 100% 100%, 98.5% 100%, 50% 59%)", background: "rgba(0,0,0,0.12)" }}
           />
           <div
             className="pointer-events-none absolute inset-0"
-            style={{
-              clipPath: "polygon(50% 40%, 49% 41%, 0 100%, 1% 100%)",
-              background: "rgba(0,0,0,0.06)",
-            }}
+            style={{ clipPath: "polygon(50% 58%, 0 100%, 1.5% 100%, 50% 59%)", background: "rgba(0,0,0,0.08)" }}
           />
+          {/* subtle outer frame */}
+          <div className="pointer-events-none absolute inset-0 rounded-[8px] ring-1 ring-neutral-200" />
         </div>
 
-        {/* ===== top flap: hinged at the fold line — folds down (closed) → up (open) =====
-            open  = rotateX(0)   → triangle pointing UP (matches a real open envelope)
-            closed = rotateX(180) → folded down over the front */}
+        {/* ===== top flap: hinged at the TOP edge — points down (closed) → folds up (open) =====
+            closed = rotateX(0)   → triangle apex-down, seated in the front (sealed)
+            open   = rotateX(180) → flap folds up & back, apex points UP above the body */}
         <motion.div
           className="absolute left-0 top-0"
           style={{
             width: "100%",
-            height: "42%",
-            transformOrigin: "50% 100%",
+            height: "58%",
+            transformOrigin: "50% 0%",
             transformStyle: "preserve-3d",
             zIndex: flapOpen ? 11 : 40,
           }}
           initial={false}
-          animate={{ rotateX: flapOpen ? 0 : 180 }}
-          transition={{ duration: 0.9, ease: [0.34, 1.12, 0.5, 1] }}
+          animate={{ rotateX: flapOpen ? 178 : 0 }}
+          transition={{ duration: 0.95, ease: [0.34, 1.06, 0.5, 1] }}
         >
-          {/* underside of the flap (seen when open, points up) */}
+          {/* single flap face — white with soft shading, reads as paper from both
+              sides. Closed: apex down, sealed. Open (rotateX 178° about the top
+              hinge): the triangle swings up & back, apex pointing UP above the body.
+              A drop-shadow along the silhouette seats it above the front when closed. */}
           <div
-            className="absolute inset-0 bg-gradient-to-t from-neutral-200 to-neutral-100"
-            style={{ clipPath: "polygon(50% 0, 100% 100%, 0 100%)", backfaceVisibility: "hidden" }}
+            className="absolute inset-0 bg-gradient-to-b from-white via-neutral-50 to-neutral-200"
+            style={{
+              clipPath: "polygon(0 0, 100% 0, 50% 100%)",
+              filter: "drop-shadow(0 4px 5px rgba(0,0,0,0.12))",
+            }}
           />
-          {/* soft shadow the standing flap casts near the fold */}
+          {/* crisp seam highlight running down the two flap edges to the apex */}
           <div
             className="pointer-events-none absolute inset-0"
             style={{
-              clipPath: "polygon(0 100%, 100% 100%, 50% 62%)",
-              background:
-                "linear-gradient(to top, rgba(0,0,0,0.14), rgba(0,0,0,0))",
-              backfaceVisibility: "hidden",
-            }}
-          />
-          {/* outer face of the flap (white, seen while closed) */}
-          <div
-            className="absolute inset-0 rounded-t-[6px] bg-gradient-to-b from-white to-neutral-100 ring-1 ring-neutral-200"
-            style={{
-              clipPath: "polygon(50% 0, 100% 100%, 0 100%)",
-              transform: "rotateX(180deg)",
-              backfaceVisibility: "hidden",
+              clipPath:
+                "polygon(0 0, 1.5% 0, 50% 97%, 100% 0, 98.5% 0, 50% 100%, 50% 100%)",
+              background: "rgba(0,0,0,0.10)",
             }}
           />
         </motion.div>

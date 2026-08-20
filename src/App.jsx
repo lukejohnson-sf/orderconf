@@ -3,11 +3,13 @@ import { AnimatePresence, motion } from "motion/react";
 import TruckScene from "./TruckScene.jsx";
 import PlaneScene from "./PlaneScene.jsx";
 import NotecardScene from "./NotecardScene.jsx";
+import ZipperScene from "./ZipperScene.jsx";
 
 const SCENES = {
   truck: { label: "Truck", Component: TruckScene },
   plane: { label: "Plane", Component: PlaneScene },
-  notecard: { label: "Notecard", Component: NotecardScene },
+  notecard: { label: "Notecard", Component: NotecardScene, standalone: true },
+  zipper: { label: "Zipper", Component: ZipperScene, standalone: true },
 };
 
 const ORDER = {
@@ -62,13 +64,14 @@ export default function App() {
     </div>
   );
 
-  // The notecard gets a dedicated full page so the raised card never crops.
-  if (variant === "notecard") {
+  // Scenes whose reveal rises out of frame get a dedicated full page so the
+  // raised card / bag never crops.
+  if (SCENES[variant].standalone) {
     return (
       <div className="flex min-h-full flex-col items-center bg-neutral-100 px-4 py-8">
         <div className="mb-2 flex justify-center">{toggle}</div>
         <div className="flex w-full max-w-3xl flex-1 items-center justify-center">
-          <NotecardScene key={variant + "-" + runId} standalone onArrived={() => setArrived(true)} />
+          <Scene key={variant + "-" + runId} standalone onArrived={() => setArrived(true)} />
         </div>
         <button
           onClick={replay}
