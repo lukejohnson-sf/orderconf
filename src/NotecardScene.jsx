@@ -67,7 +67,7 @@ export default function NotecardScene({ onArrived, standalone = false }) {
 
         {/* ===== the notecard (slides up out of the envelope) ===== */}
         <motion.div
-          className="absolute left-1/2 z-[15] flex flex-col items-center justify-center rounded-[3px] bg-white ring-1 ring-neutral-200"
+          className="absolute left-1/2 z-[30] flex flex-col items-center justify-center rounded-[3px] bg-white ring-1 ring-neutral-200"
           style={{
             width: "78%",
             height: "64%",
