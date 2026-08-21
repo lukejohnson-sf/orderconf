@@ -90,7 +90,7 @@ export default function NotecardScene({ onArrived, standalone = false }) {
           }}
         >
           <img
-            src="/baggallini-logo.png"
+            src={`${import.meta.env.BASE_URL}baggallini-logo.png`}
             alt="baggallini"
             className="mb-5 h-3.5 w-auto opacity-90"
           />

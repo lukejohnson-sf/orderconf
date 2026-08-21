@@ -154,7 +154,7 @@ export default function TruckScene({ onArrived }) {
                 transition={{ duration: 0.5, delay: assembled ? 0.35 : 0 }}
               >
                 <image
-                  href="/baggallini-logo.png"
+                  href={`${import.meta.env.BASE_URL}baggallini-logo.png`}
                   x="144"
                   y="180"
                   width="82"
